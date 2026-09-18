@@ -1,0 +1,26 @@
+REPORT zapprove_exit.
+
+DATA: ls_clear TYPE zdept_clear.
+
+START-OF-SELECTION.
+
+  " 1. Insert/Update Clearance Record for Exit ID 1
+  ls_clear-exit_id     = 1.
+  ls_clear-dept_code   = 'HR'.
+  ls_clear-clear_stat  = 'C'.
+  ls_clear-approved_by = sy-uname.
+  ls_clear-approved_on = sy-datum.
+
+  MODIFY zdept_clear FROM ls_clear.
+
+  " 2. Mark master exit record as Cleared ('C')
+  UPDATE zemp_exit
+    SET overall_stat = 'C'
+    WHERE exit_id = 1.
+
+  IF sy-subrc = 0.
+    COMMIT WORK.
+    MESSAGE 'Exit Request 1 is now FULLY CLEARED!' TYPE 'I'.
+  ELSE.
+    WRITE: / 'Update failed. Check if Exit ID 1 exists in ZEMP_EXIT.'.
+  ENDIF.
